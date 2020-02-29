@@ -1,0 +1,6 @@
+flask
+flask_sqlalchemy
+flask_marshmallow
+flask_restful
+marshmallow-sqlalchemy
+qrcode[pil]
