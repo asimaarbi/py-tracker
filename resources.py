@@ -61,14 +61,16 @@ class ProductResource(Resource):
         parser.add_argument('qr_code', type=str, help='qr_code', required=False)
         args = parser.parse_args(strict=True)
 
-        product = Product.query.filter(
-            (Product.qr_code == args['qr_code']) | (Product.track_id == args['track_id'])).first()
-        if not product:
-            return "", 404
-        db.session.delete(product)
-        db.session.commit()
-        Path(os.path.join("./", product.file)).unlink()
-
+        if args['qr_code'] or args['track_id'] or args['vehicle_num']:
+            products = Product.query.filter(
+                ((Product.vehicle_num == args['vehicle_num']) | (Product.qr_code == args['qr_code']) | (
+                        Product.track_id == args['track_id']))).all()
+            if not products:
+                return "", 404
+            for product in products:
+                db.session.delete(product)
+                db.session.commit()
+                Path(os.path.join("./", product.file)).unlink()
         return "", 204
 
     def get(self):
@@ -86,6 +88,5 @@ class ProductResource(Resource):
                 return "", 404
             schema = ProductSchema(many=True)
             return schema.dump(product)
-        print(Product.query.all())
         schema = ProductSchema(many=True)
         return schema.dump(Product.query.all()), 200
